@@ -1,103 +1,138 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { uploadImages, loadImages } from '../app/utils/api';
+import Image from 'next/image';
+
+export default function HomePage() {
+  const [evento, setEvento] = useState('');
+  const [files, setFiles] = useState<FileList | null>(null);
+  const [imagens, setImagens] = useState<string[]>([]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const eventoQuery = params.get('evento') || '';
+    setEvento(eventoQuery);
+    if (eventoQuery) {
+      handleLoad(eventoQuery);
+    }
+  }, []);
+
+  const handleUpload = async () => {
+    if (!evento || !files) {
+      alert('Informe o evento e selecione imagens.');
+      return;
+    }
+    await uploadImages(evento, files);
+    alert('Imagens enviadas!');
+    handleLoad(evento);
+  };
+
+  const handleLoad = async (evento: string) => {
+    const urls = await loadImages(evento);
+
+    // Ordena pela data extraída da URL (assumindo que o nome tem timestamp)
+    const sorted = urls.sort((a, b) => {
+      const getDateFromUrl = (url: string) => {
+        const match = url.match(/(\d{4}-\d{2}-\d{2}T\d{6})/); // ex: 2025-07-08T180000
+        return match ? new Date(match[1].replace('T', '').replace(/(\d{2})(\d{2})(\d{2})/, '$1:$2:$3')) : new Date(0);
+      };
+      return getDateFromUrl(b).getTime() - getDateFromUrl(a).getTime(); // mais recentes primeiro
+    });
+
+    setImagens(sorted);
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div style={styles.container}>
+      <h1 style={styles.title}>Upload de Imagens</h1>
+      <p>{evento ? `Evento selecionado: ${evento}` : 'Nenhum evento especificado'}</p>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      <input
+        type="file"
+        multiple
+        accept="image/*"
+        onChange={(e) => setFiles(e.target.files)}
+      />
+      <button style={styles.button} onClick={handleUpload}>Enviar Imagens</button>
+
+      {imagens.length > 0 && (
+        <>
+          <h2>Miniaturas</h2>
+          <div style={styles.gallery}>
+            {imagens.slice(-6).reverse().map((url, index) => (
+              <Image
+                key={index}
+                src={url}
+                alt={`Imagem ${index}`}
+                width={120}
+                height={80}
+                style={{ borderRadius: '5px', objectFit: 'cover', width: '100%', height: 'auto' }}
+              />
+            ))}
+          </div>
+
+          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+            <Link href={`/album?evento=${evento}`} style={styles.link}>
+              Ver álbum completo →
+            </Link>
+          </div>
+        </>
+      )}
     </div>
   );
 }
+
+const styles: { [key: string]: React.CSSProperties } = {
+  container: {
+    maxWidth: '600px',
+    margin: 'auto',
+    padding: '2rem',
+    background: '#fff',
+    borderRadius: '8px',
+    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+    fontFamily: 'Arial, sans-serif',
+  },
+  title: {
+    fontSize: '1.8rem',
+    fontWeight: 700,
+    textAlign: 'center',
+    marginBottom: '1.5rem',
+  },
+  gallery: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+    gap: '10px',
+    marginTop: '1rem',
+  },
+  image: {
+    width: '100%',
+    height: '80px',
+    objectFit: 'cover',
+    borderRadius: '5px',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+    cursor: 'pointer',
+  },
+  button: {
+    width: '100%',
+    marginTop: '1rem',
+    padding: '0.75rem',
+    fontWeight: 'bold',
+    fontSize: '1rem',
+    borderRadius: '6px',
+    background: 'linear-gradient(135deg, #4fc3f7, #81d4fa)',
+    border: 'none',
+    color: '#fff',
+    cursor: 'pointer',
+    boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+  },
+  link: {
+    display: 'inline-block',
+    marginTop: '1rem',
+    color: '#007bff',
+    textDecoration: 'none',
+    fontWeight: 600,
+    fontSize: '1rem',
+  },
+};

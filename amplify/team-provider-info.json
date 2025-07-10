@@ -1,0 +1,23 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-galeriaevento-dev-5cf11-authRole",
+      "UnauthRoleArn": "arn:aws:iam::147397866377:role/amplify-galeriaevento-dev-5cf11-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::147397866377:role/amplify-galeriaevento-dev-5cf11-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-galeriaevento-dev-5cf11-deployment",
+      "UnauthRoleName": "amplify-galeriaevento-dev-5cf11-unauthRole",
+      "StackName": "amplify-galeriaevento-dev-5cf11",
+      "StackId": "arn:aws:cloudformation:us-east-1:147397866377:stack/amplify-galeriaevento-dev-5cf11/aa04e930-5c6b-11f0-b70b-12c636b17765",
+      "AmplifyAppId": "d3nos8p1qeshif"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d3nos8p1qeshif",
+          "type": "manual"
+        }
+      }
+    }
+  }
+}
