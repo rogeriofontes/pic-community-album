@@ -25,7 +25,7 @@ export default function AlbumPage() {
 
     const fetchImages = async (evento: string) => {
         try {
-            const res = await fetch(`https://ezdt6pmdd1.execute-api.us-east-1.amazonaws.com/Prod/images?evento=${encodeURIComponent(evento)}`);
+            const res = await fetch(`https://ogn8u7wyp4.execute-api.us-east-1.amazonaws.com/Prod/images?evento=${encodeURIComponent(evento)}`);
             const data = await res.json();
 
             // 🔽 Ordena por data embutida no nome da imagem
