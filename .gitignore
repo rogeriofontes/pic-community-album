@@ -82,5 +82,6 @@ amplifyconfiguration.json
 amplify-build-config.json
 amplify-gradle-config.json
 amplifyxc.config
+.env.local
 
 # End of https://www.toptal.com/developers/gitignore/api/amplify

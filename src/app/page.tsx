@@ -5,10 +5,11 @@ import Link from 'next/link';
 import { uploadImages, loadImages } from '../app/utils/api';
 import Image from 'next/image';
 
-export default function HomePage() {
+export default function () {
   const [evento, setEvento] = useState('');
   const [files, setFiles] = useState<FileList | null>(null);
   const [imagens, setImagens] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -24,9 +25,17 @@ export default function HomePage() {
       alert('Informe o evento e selecione imagens.');
       return;
     }
-    await uploadImages(evento, files);
-    alert('Imagens enviadas!');
-    handleLoad(evento);
+
+    setIsLoading(true); // 👈 Inicia carregamento
+    try {
+      await uploadImages(evento, files);
+      alert('Imagens enviadas!');
+      handleLoad(evento);
+    } catch (err) {
+      alert('Erro ao enviar imagens');
+    } finally {
+      setIsLoading(false); // 👈 Finaliza carregamento
+    }
   };
 
   const handleLoad = async (evento: string) => {
@@ -48,13 +57,32 @@ export default function HomePage() {
     <div style={styles.container}>
       <h1 style={styles.title}>Upload de Imagens</h1>
       <p>{evento ? `Evento selecionado: ${evento}` : 'Nenhum evento especificado'}</p>
+      {isLoading && (
+        <div style={styles.loader}>
+          <img src="/Loading_icon.gif" alt="Carregando..." width={48} height={48} />
+          <p>Carregando imagens, por favor aguarde...</p>
+        </div>
+      )}
+
+      <label htmlFor="upload" style={styles.uploadLabel}>
+        📷 Selecionar imagens
+      </label>
 
       <input
+        id="upload" // precisa ser igual ao htmlFor
         type="file"
         multiple
         accept="image/*"
         onChange={(e) => setFiles(e.target.files)}
+        style={{ display: 'none' }}
       />
+
+      {files && (
+        <p style={styles.fileCount}>
+          {files.length} {files.length === 1 ? 'imagem selecionada' : 'imagens selecionadas'}
+        </p>
+      )}
+
       <button style={styles.button} onClick={handleUpload}>Enviar Imagens</button>
 
       {imagens.length > 0 && (
@@ -121,11 +149,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: 'bold',
     fontSize: '1rem',
     borderRadius: '6px',
-    background: 'linear-gradient(135deg, #4fc3f7, #81d4fa)',
-    border: 'none',
-    color: '#fff',
+    background: 'linear-gradient(135deg, #e0f7fa, #b2ebf2)', // degradê leve azul-claro
+    border: '1px solid #81d4fa',
+    color: '#000',
     cursor: 'pointer',
-    boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+    transition: 'background 0.3s ease',
   },
   link: {
     display: 'inline-block',
@@ -135,4 +164,39 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: 600,
     fontSize: '1rem',
   },
+  loader: {
+    marginTop: '1rem',
+    padding: '1rem',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    color: '#666',
+    fontSize: '1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.5rem',
+  },
+  uploadLabel: {
+    display: 'inline-block',
+    marginTop: '1rem',
+    padding: '0.75rem',
+    fontWeight: 'bold',
+    fontSize: '1rem',
+    borderRadius: '6px',
+    background: 'linear-gradient(135deg, #e0f7fa, #b2ebf2)',
+    border: '1px solid #81d4fa',
+    color: '#333',
+    cursor: 'pointer',
+    textAlign: 'center',
+    width: '96%',
+  },
+  fileCount: {
+    marginTop: '0.5rem',
+    fontSize: '0.9rem',
+    textAlign: 'center',
+    color: '#555',
+    fontStyle: 'italic',
+  }
+
+
 };
