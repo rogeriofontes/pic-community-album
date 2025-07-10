@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { uploadImages, loadImages } from '../app/utils/api';
 import Image from 'next/image';
 
-export default function () {
+const Page = () => {
   const [evento, setEvento] = useState('');
   const [files, setFiles] = useState<FileList | null>(null);
   const [imagens, setImagens] = useState<string[]>([]);
@@ -31,7 +31,7 @@ export default function () {
       await uploadImages(evento, files);
       alert('Imagens enviadas!');
       handleLoad(evento);
-    } catch (err) {
+    } catch {
       alert('Erro ao enviar imagens');
     } finally {
       setIsLoading(false); // 👈 Finaliza carregamento
@@ -59,7 +59,7 @@ export default function () {
       <p>{evento ? `Evento selecionado: ${evento}` : 'Nenhum evento especificado'}</p>
       {isLoading && (
         <div style={styles.loader}>
-          <img src="/Loading_icon.gif" alt="Carregando..." width={48} height={48} />
+          <Image src="/Loading_icon.gif" alt="Carregando..." width={48} height={48} />
           <p>Carregando imagens, por favor aguarde...</p>
         </div>
       )}
@@ -200,3 +200,5 @@ const styles: { [key: string]: React.CSSProperties } = {
 
 
 };
+
+export default Page;
